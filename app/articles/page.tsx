@@ -13,13 +13,13 @@ const categories = [
   { name: "随笔", count: 3, color: "bg-gray-800 text-white" },
 ];
 
-async function getPosts() {
+async function getArticles() {
   const res = await fetch('http://localhost:3000/api/articles', { cache: 'no-store' });
   return res.json();
 }
 
 export default async function ArticlesPage() {
-  const articles = await getPosts();
+  const articles = await getArticles();
 
   return (
     <div className="flex flex-col min-h-screen">
