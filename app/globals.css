@@ -19,6 +19,11 @@
   }
 }
 
+html {
+  /* 始终预留滚动条空间，避免路由切换时页面横向抖动 */
+  scrollbar-gutter: stable;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
