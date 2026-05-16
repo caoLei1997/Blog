@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Nav } from "@/component";
+import { Nav,PageTransition } from "@/component";
+import 'highlight.js/styles/github-dark.css';
 import "./globals.css";
 
 const geistSans = Geist({
@@ -30,7 +31,10 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <Nav />
-        {children}
+        {/* <PageTransition>
+          {children}
+        </PageTransition> */}
+         {children}
       </body>
     </html>
   );
