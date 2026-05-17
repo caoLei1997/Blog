@@ -1,14 +1,15 @@
 import { PageHeader, MarkdownContent, BackButton } from "@/common";
+import { notFound } from "next/navigation";
+import { getArticleById } from "@/lib/articles";
 // import { fakeMarkdown } from './mock.js'
 
-async function getArticle(id: string) {
-  const res = await fetch(`http://localhost:3000/api/articles/${id}`, { cache: 'no-store' });
-  return res.json();
-}
 export default async function ArticleDetail({ params }: { params: Promise<{ slug: string }> }) {
   // Next.js 15+：params 是异步的，需要 await
   const { slug } = await params;
-  const data = await getArticle(slug);
+  const data = await getArticleById(slug);
+  if (!data) {
+    notFound();
+  }
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-12">

@@ -1,17 +1,7 @@
 import Image from "next/image";
 
 import Link from "next/link";
-
-interface Article {
-  id: number;
-  title: string;
-  date: string;
-  heat: number;
-  comments: number;
-  likes: number;
-  excerpt: string;
-  cover: string;
-}
+import { getArticles, type Article } from "@/lib/articles";
 
 const categories = [
   { name: "前端", count: 8, color: "bg-emerald-400" },
@@ -23,11 +13,6 @@ const categories = [
   { name: "工具", count: 4, color: "bg-emerald-400" },
   { name: "随笔", count: 3, color: "bg-gray-800 text-white" },
 ];
-
-async function getArticles(): Promise<Article[]> {
-  const res = await fetch('http://localhost:3000/api/articles', { cache: 'no-store' });
-  return res.json();
-}
 
 export default async function ArticlesPage() {
   const articles = await getArticles();
