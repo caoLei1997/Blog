@@ -10,3 +10,7 @@ components:shadcn UI
 lib:公共函数
 hooks：自定义hooks
 
+## env.local
+ADMIN_USER=admin
+ADMIN_PASS=your_strong_password_here
+
