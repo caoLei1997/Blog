@@ -2,6 +2,17 @@ import Image from "next/image";
 
 import Link from "next/link";
 
+interface Article {
+  id: number;
+  title: string;
+  date: string;
+  heat: number;
+  comments: number;
+  likes: number;
+  excerpt: string;
+  cover: string;
+}
+
 const categories = [
   { name: "前端", count: 8, color: "bg-emerald-400" },
   { name: "React", count: 6, color: "bg-emerald-400" },
@@ -13,7 +24,7 @@ const categories = [
   { name: "随笔", count: 3, color: "bg-gray-800 text-white" },
 ];
 
-async function getArticles() {
+async function getArticles(): Promise<Article[]> {
   const res = await fetch('http://localhost:3000/api/articles', { cache: 'no-store' });
   return res.json();
 }
@@ -51,7 +62,7 @@ export default async function ArticlesPage() {
 
           {/* Article List */}
           <div className="flex flex-col gap-6">
-            {articles.map((article) => (
+            {articles.map((article: Article) => (
               <article
                 key={article.id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
