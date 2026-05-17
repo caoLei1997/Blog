@@ -1,4 +1,4 @@
-import { PageHeader } from "@/component";
+import { PageHeader } from "@/common";
 
 export default function SocialPage() {
   return (

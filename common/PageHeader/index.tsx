@@ -1,4 +1,4 @@
-import { BackgroundImg } from "@/component";
+import { BackgroundImg } from "@/common";
 
 interface PageHeaderProps {
   title: string;

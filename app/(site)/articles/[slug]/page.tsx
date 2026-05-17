@@ -1,4 +1,4 @@
-import { PageHeader, MarkdownContent, BackButton } from "@/component";
+import { PageHeader, MarkdownContent, BackButton } from "@/common";
 // import { fakeMarkdown } from './mock.js'
 
 async function getArticle(id: string) {
