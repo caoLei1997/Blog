@@ -14,7 +14,7 @@
 
 ```env
 ADMIN_USER=admin
-ADMIN_PASS=your_strong_password_here
+ADMIN_PASS=your_strong_password_here```
 
 
 ## 在线预览
