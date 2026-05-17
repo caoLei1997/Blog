@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import Link from "next/link";
-import { getArticles, type Article } from "@/lib/articles";
+import { getArticles, } from "@/lib/articles";
 
 const categories = [
   { name: "前端", count: 8, color: "bg-emerald-400" },
@@ -47,7 +47,7 @@ export default async function ArticlesPage() {
 
           {/* Article List */}
           <div className="flex flex-col gap-6">
-            {articles.map((article: Article) => (
+            {articles.map((article) => (
               <article
                 key={article.id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
