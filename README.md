@@ -11,10 +11,9 @@
 - `hooks`：自定义 hooks
 
 ## 环境变量（.env.local）
-
-```env
+env
 ADMIN_USER=admin
-ADMIN_PASS=your_strong_password_here```
+ADMIN_PASS=your_strong_password_here
 
 
 ## 在线预览
