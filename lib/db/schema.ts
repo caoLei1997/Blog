@@ -21,3 +21,37 @@ export const articlesToTags = sqliteTable('articles_to_tags', {
   articleId: text('article_id').references(() => articles.id),
   tagId: text('tag_id').references(() => tags.id),
 });
+
+// 杂烩表
+export const misc = sqliteTable('misc', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  excerpt: text('excerpt'),
+  cover: text('cover'),
+  published: integer('published', { mode: 'boolean' }).default(false),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// 人生路表
+export const life = sqliteTable('life', {
+  id: text('id').primaryKey(),
+  title: text('title').notNull(),
+  content: text('content').notNull(),
+  excerpt: text('excerpt'),
+  cover: text('cover'),
+  published: integer('published', { mode: 'boolean' }).default(false),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+// 摄影表
+export const photography = sqliteTable('photography', {
+  id: text('id').primaryKey(),
+  title: text('title'),
+  description: text('description'),
+  imageUrl: text('image_url').notNull(),
+  published: integer('published', { mode: 'boolean' }).default(false),
+  createdAt: text('created_at').notNull(),
+});

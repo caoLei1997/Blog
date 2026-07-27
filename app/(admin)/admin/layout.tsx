@@ -7,12 +7,18 @@ import {
   Image,
   LogOut,
   ChevronLeft,
+  UtensilsCrossed,
+  Heart,
+  Camera,
 } from 'lucide-react';
 
 const menuItems = [
   { label: '仪表盘', href: '/admin', icon: LayoutDashboard },
   { label: '文章管理', href: '/admin/articles', icon: FileText },
   { label: '新建文章', href: '/admin/articles/new', icon: FileText },
+  { label: '杂烩管理', href: '/admin/misc', icon: UtensilsCrossed },
+  { label: '人生路管理', href: '/admin/life', icon: Heart },
+  { label: '摄影管理', href: '/admin/photography', icon: Camera },
   { label: '分类/标签', href: '/admin/tags', icon: Tags },
   { label: '媒体库', href: '/admin/media', icon: Image },
 ];
