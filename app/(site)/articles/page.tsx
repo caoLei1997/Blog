@@ -47,32 +47,21 @@ export default async function ArticlesPage() {
 
           {/* Article List */}
           <div className="flex flex-col gap-6">
-            {articles.map((article) => (
+            {articles.map((article, index) => (
               <article
                 key={article.id}
                 className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
               >
-                <Link href={`/articles/${article.id}`} className="flex flex-col md:flex-row">
+                <Link href={`/articles/${article.slug}`} className="flex flex-col md:flex-row">
                   {/* Article Info */}
                   <div className="flex-1 p-6">
                     <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
                       <span>🕐</span>
-                      <span>发布于 {article.date}</span>
+                      <span>发布于 {article.createdAt.slice(0, 10)}</span>
                     </div>
                     <h3 className="text-lg font-bold text-gray-800 mb-3 hover:text-blue-500 transition-colors">
                       {article.title}
                     </h3>
-                    <div className="flex items-center gap-4 text-xs text-gray-400 mb-3">
-                      <span className="flex items-center gap-1">
-                        🔥 {article.heat} 热度
-                      </span>
-                      <span className="flex items-center gap-1">
-                        💬 {article.comments} 条评论
-                      </span>
-                      <span className="flex items-center gap-1">
-                        ❤️ {article.likes} 点赞
-                      </span>
-                    </div>
                     <p className="text-sm text-gray-500 leading-relaxed line-clamp-2">
                       {article.excerpt}
                     </p>
@@ -80,7 +69,7 @@ export default async function ArticlesPage() {
                   {/* Article Cover */}
                   <div className="relative w-full md:w-[240px] h-[160px] md:h-auto shrink-0">
                     <Image
-                      src={article.cover}
+                      src={index % 2 === 0 ? "/img/r1.jpg" : "/img/r2.jpg"}
                       alt={article.title}
                       fill
                       className="object-cover"
