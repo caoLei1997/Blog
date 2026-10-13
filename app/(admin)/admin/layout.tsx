@@ -5,7 +5,6 @@ import {
   FileText,
   Tags,
   Image,
-  LogOut,
   ChevronLeft,
   UtensilsCrossed,
   Heart,

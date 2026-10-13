@@ -1,4 +1,5 @@
 import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
 
 export const articles = sqliteTable('articles', {
   id: text('id').primaryKey(),            // nanoid
@@ -55,3 +56,23 @@ export const photography = sqliteTable('photography', {
   published: integer('published', { mode: 'boolean' }).default(false),
   createdAt: text('created_at').notNull(),
 });
+
+// 关系定义（仅 ORM 层，不涉及数据库结构变更）
+export const articlesRelations = relations(articles, ({ many }) => ({
+  articleTags: many(articlesToTags),
+}));
+
+export const tagsRelations = relations(tags, ({ many }) => ({
+  articleTags: many(articlesToTags),
+}));
+
+export const articlesToTagsRelations = relations(articlesToTags, ({ one }) => ({
+  article: one(articles, {
+    fields: [articlesToTags.articleId],
+    references: [articles.id],
+  }),
+  tag: one(tags, {
+    fields: [articlesToTags.tagId],
+    references: [tags.id],
+  }),
+}));

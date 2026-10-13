@@ -6,10 +6,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { label: "首页", icon: "🏠", href: "/" },
   { label: "文章", icon: "📝", href: "/articles" },
-  { label: "杂烩", icon: "🎨", href: "/misc" },
-  { label: "人生路", icon: "🚶", href: "/life" },
   { label: "社交", icon: "💬", href: "/social" },
-  { label: "摄影", icon: "✨", href: "/photography" },
 ];
 
 export default function Nav() {

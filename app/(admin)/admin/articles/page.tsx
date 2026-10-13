@@ -1,4 +1,6 @@
-// app/admin/posts/page.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,15 +11,43 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Plus } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 
-// 写死数据演示，后续替换为 fetch('/api/admin/posts')
-const posts = [
-  { id: '1', title: '你好，世界', status: '已发布', date: '2026-05-01' },
-  { id: '2', title: 'Next.js 16 学习笔记', status: '草稿', date: '2026-05-10' },
-];
+interface Tag {
+  id: string;
+  name: string;
+}
 
-export default function PostsPage() {
+interface ArticleItem {
+  id: string;
+  title: string;
+  slug: string;
+  published: boolean;
+  createdAt: string;
+  articleTags: { tag: Tag }[];
+}
+
+export default function AdminArticlesPage() {
+  const [items, setItems] = useState<ArticleItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchItems = () => {
+    fetch('/api/admin/articles')
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data);
+        setLoading(false);
+      });
+  };
+
+  useEffect(() => { fetchItems(); }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('确认删除这篇文章？')) return;
+    await fetch(`/api/admin/articles/${id}`, { method: 'DELETE' });
+    fetchItems();
+  };
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -34,34 +64,56 @@ export default function PostsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>标题</TableHead>
+              <TableHead>标签</TableHead>
               <TableHead>状态</TableHead>
               <TableHead>日期</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {posts.map((post) => (
-              <TableRow key={post.id}>
-                <TableCell className="font-medium">{post.title}</TableCell>
-                <TableCell>
-                  <span
-                    className={
-                      post.status === '已发布'
-                        ? 'text-green-600'
-                        : 'text-yellow-600'
-                    }
-                  >
-                    {post.status}
-                  </span>
-                </TableCell>
-                <TableCell className="text-gray-500">{post.date}</TableCell>
-                <TableCell className="text-right">
-                  <Link href={`/admin/articles/${post.id}`}>
-                    <Button variant="outline" size="sm">编辑</Button>
-                  </Link>
-                </TableCell>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-gray-400">加载中...</TableCell>
               </TableRow>
-            ))}
+            ) : items.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="text-center text-gray-400">暂无数据</TableCell>
+              </TableRow>
+            ) : (
+              items.map((item) => (
+                <TableRow key={item.id}>
+                  <TableCell className="font-medium max-w-[280px] truncate">
+                    {item.title}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-wrap gap-1">
+                      {item.articleTags?.map(({ tag }) => (
+                        <span
+                          key={tag.id}
+                          className="inline-flex items-center px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 text-xs"
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className={item.published ? 'text-green-600' : 'text-yellow-600'}>
+                      {item.published ? '已发布' : '草稿'}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-gray-500">{item.createdAt.slice(0, 10)}</TableCell>
+                  <TableCell className="text-right space-x-2">
+                    <Link href={`/admin/articles/${item.id}`}>
+                      <Button variant="outline" size="sm">编辑</Button>
+                    </Link>
+                    <Button variant="destructive" size="sm" onClick={() => handleDelete(item.id)}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </div>

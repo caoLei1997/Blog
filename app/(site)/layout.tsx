@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Nav, PageTransition } from "@/common";
+import { Nav } from "@/common";
 import 'highlight.js/styles/github-dark.css';
 import "../globals.css";
 

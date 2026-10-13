@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { db } from './db/index';
 import { life } from './db/schema';
 
@@ -58,4 +58,14 @@ export async function updateLife(id: string, data: {
 
 export async function deleteLife(id: string) {
   await db.delete(life).where(eq(life.id, id));
+}
+
+export async function getLifeStats() {
+  const rows = await db
+    .select({
+      total: sql<number>`count(*)`,
+      published: sql<number>`sum(case when ${life.published} then 1 else 0 end)`,
+    })
+    .from(life);
+  return { total: rows[0]?.total ?? 0, published: rows[0]?.published ?? 0 };
 }

@@ -24,11 +24,13 @@ export default function AdminMiscPage() {
   const [items, setItems] = useState<MiscItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchItems = async () => {
-    const res = await fetch('/api/misc');
-    const data = await res.json();
-    setItems(data);
-    setLoading(false);
+  const fetchItems = () => {
+    fetch('/api/misc')
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data);
+        setLoading(false);
+      });
   };
 
   useEffect(() => { fetchItems(); }, []);

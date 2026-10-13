@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { db } from './db/index';
 import { photography } from './db/schema';
 
@@ -54,4 +54,14 @@ export async function updatePhotography(id: string, data: {
 
 export async function deletePhotography(id: string) {
   await db.delete(photography).where(eq(photography.id, id));
+}
+
+export async function getPhotographyStats() {
+  const rows = await db
+    .select({
+      total: sql<number>`count(*)`,
+      published: sql<number>`sum(case when ${photography.published} then 1 else 0 end)`,
+    })
+    .from(photography);
+  return { total: rows[0]?.total ?? 0, published: rows[0]?.published ?? 0 };
 }

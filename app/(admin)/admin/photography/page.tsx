@@ -19,11 +19,13 @@ export default function AdminPhotographyPage() {
   const [items, setItems] = useState<PhotoItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchItems = async () => {
-    const res = await fetch('/api/photography');
-    const data = await res.json();
-    setItems(data);
-    setLoading(false);
+  const fetchItems = () => {
+    fetch('/api/photography')
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data);
+        setLoading(false);
+      });
   };
 
   useEffect(() => { fetchItems(); }, []);
@@ -61,7 +63,16 @@ export default function AdminPhotographyPage() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center gap-2">
+                  <Link href={`/admin/photography/${item.id}`}>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      编辑
+                    </Button>
+                  </Link>
                   <Button
                     variant="destructive"
                     size="sm"

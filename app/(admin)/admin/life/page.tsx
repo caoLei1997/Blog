@@ -24,11 +24,13 @@ export default function AdminLifePage() {
   const [items, setItems] = useState<LifeItem[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchItems = async () => {
-    const res = await fetch('/api/life');
-    const data = await res.json();
-    setItems(data);
-    setLoading(false);
+  const fetchItems = () => {
+    fetch('/api/life')
+      .then((res) => res.json())
+      .then((data) => {
+        setItems(data);
+        setLoading(false);
+      });
   };
 
   useEffect(() => { fetchItems(); }, []);

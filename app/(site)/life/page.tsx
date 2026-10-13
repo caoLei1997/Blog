@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { PageHeader } from "@/common";
 import { getLifeList } from "@/lib/life";
 
@@ -19,7 +20,7 @@ export default async function LifePage() {
                   key={item.id}
                   className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
                 >
-                  <div className="flex flex-col md:flex-row">
+                  <Link href={`/life/${item.id}`} className="flex flex-col md:flex-row">
                     <div className="flex-1 p-6">
                       <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
                         <span>🕐</span>
@@ -44,7 +45,7 @@ export default async function LifePage() {
                         />
                       </div>
                     )}
-                  </div>
+                  </Link>
                 </article>
               ))}
             </div>

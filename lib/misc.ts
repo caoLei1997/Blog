@@ -1,5 +1,5 @@
 import { nanoid } from 'nanoid';
-import { eq, desc } from 'drizzle-orm';
+import { eq, desc, sql } from 'drizzle-orm';
 import { db } from './db/index';
 import { misc } from './db/schema';
 
@@ -58,4 +58,14 @@ export async function updateMisc(id: string, data: {
 
 export async function deleteMisc(id: string) {
   await db.delete(misc).where(eq(misc.id, id));
+}
+
+export async function getMiscStats() {
+  const rows = await db
+    .select({
+      total: sql<number>`count(*)`,
+      published: sql<number>`sum(case when ${misc.published} then 1 else 0 end)`,
+    })
+    .from(misc);
+  return { total: rows[0]?.total ?? 0, published: rows[0]?.published ?? 0 };
 }
