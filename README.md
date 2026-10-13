@@ -16,6 +16,10 @@ ADMIN_USER=admin
 ADMIN_PASS=your_strong_password_here
 
 
+## CI/CD
+
+代码托管在 GitCode，使用 GitCode CI 实现「push 到 main 自动构建并 SSH 部署到自有服务器」，健康检查失败自动回滚。详见 [docs/CICD.md](docs/CICD.md)。
+
 ## 在线预览
 🔗 **[在线预览](https://blog-3k6727z1u-caolei-s-projects.vercel.app/)**
 

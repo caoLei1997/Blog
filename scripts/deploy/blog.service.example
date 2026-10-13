@@ -1,0 +1,24 @@
+[Unit]
+Description=Blog (Next.js standalone)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# 运行用户：确保对 DEPLOY_PATH（如 /opt/blog）有读写权限
+User=blog
+Group=blog
+# 指向 current 软链，部署时原子切换
+WorkingDirectory=/opt/blog/current
+# 运行时环境变量（TURSO_DATABASE_URL、TURSO_AUTH_TOKEN、ADMIN_USER、ADMIN_PASS、PORT 等）
+EnvironmentFile=/opt/blog/shared/blog.env
+# 按服务器实际 node 路径调整（which node 查看）
+ExecStart=/usr/bin/node server.js
+Restart=always
+RestartSec=5
+# 日志输出（目录需存在且运行用户可写；也可改用 journald 去掉这两行）
+StandardOutput=append:/var/log/blog/blog.log
+StandardError=append:/var/log/blog/blog-error.log
+
+[Install]
+WantedBy=multi-user.target

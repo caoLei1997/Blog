@@ -1,0 +1,164 @@
+name: CI/CD
+
+# 触发条件：
+# - 任意分支 push：执行 Lint + 构建（验证代码可发布）
+# - PR 到 main：执行 Lint + 构建（合并前检查）
+# - push 到 main：构建成功后自动部署到生产服务器
+# - 手动触发（workflow_dispatch）：可选是否部署
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: "构建完成后是否部署到生产服务器 (true/false)"
+        type: string
+        required: false
+        default: "false"
+
+# 同一仓库的流水线串行执行，避免并发部署互相覆盖
+concurrency:
+  enable: true
+  max: 1
+  exceed-action: QUEUE
+
+env:
+  NODE_VERSION: "24.21.0"
+  ARTIFACT_NAME: blog-release
+  # 部署相关默认值（可用项目级 vars 覆盖：vars.DEPLOY_SERVICE_NAME 等）
+  DEPLOY_SERVICE_NAME: ${{ vars.DEPLOY_SERVICE_NAME || 'blog' }}
+  KEEP_RELEASES: "5"
+
+jobs:
+  build:
+    name: Lint 与构建
+    runs-on: [ubuntu-latest, x64, small]
+    steps:
+      - name: 检出代码
+        uses: checkout
+
+      - name: 配置 Node.js ${{ env.NODE_VERSION }}
+        uses: setup-node
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 缓存 npm 依赖
+        uses: cache
+        with:
+          path: ~/.npm
+          key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            npm-${{ runner.os }}-
+
+      - name: 安装依赖
+        run: npm ci
+
+      - name: ESLint 检查
+        run: npm run lint
+
+      - name: 构建（Next.js standalone）
+        env:
+          TURSO_DATABASE_URL: ${{ secrets.TURSO_DATABASE_URL }}
+          TURSO_AUTH_TOKEN: ${{ secrets.TURSO_AUTH_TOKEN }}
+          ADMIN_USER: ${{ secrets.ADMIN_USER }}
+          ADMIN_PASS: ${{ secrets.ADMIN_PASS }}
+        run: npm run build
+
+      - name: 打包 standalone 产物
+        run: |
+          set -e
+          test -f .next/standalone/server.js
+          rm -rf release
+          mkdir -p release
+          # standalone 产物 + 静态资源 + public 目录
+          cp -r .next/standalone/. release/
+          mkdir -p release/.next
+          cp -r .next/static release/.next/static
+          if [ -d public ]; then
+            cp -r public release/public
+          fi
+          echo "${{ atomgit.sha }}" > release/RELEASE_SHA
+          tar -C release -czf blog-release.tar.gz .
+          ls -lh blog-release.tar.gz
+
+      - name: 上传构建产物
+        uses: upload-artifact
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: blog-release.tar.gz
+
+  deploy:
+    name: 部署到生产服务器
+    runs-on: [ubuntu-latest, x64, small]
+    needs: build
+    # 仅 main 分支的 push，或手动触发时选择部署，才执行
+    if: ${{ (atomgit.event_name == 'push' && atomgit.ref == 'refs/heads/main') || inputs.deploy == 'true' }}
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+      HEALTH_CHECK_URL: ${{ vars.HEALTH_CHECK_URL || 'http://127.0.0.1:3000' }}
+    steps:
+      - name: 检出代码（获取部署脚本）
+        uses: checkout
+
+      - name: 下载构建产物
+        uses: download-artifact
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: release/
+
+      - name: 配置 SSH 密钥
+        run: |
+          set -e
+          test -n "$DEPLOY_SSH_KEY" || { echo "缺少 secrets.DEPLOY_SSH_KEY"; exit 1; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "$DEPLOY_PORT" "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          cat > ~/.ssh/config <<EOF
+          Host deploy-target
+            HostName $DEPLOY_HOST
+            Port $DEPLOY_PORT
+            User $DEPLOY_USER
+            IdentityFile ~/.ssh/deploy_key
+            IdentitiesOnly yes
+          EOF
+          chmod 600 ~/.ssh/config
+          ssh -o BatchMode=yes deploy-target "echo SSH 连接成功: \$(hostname)"
+
+      - name: 上传产物到服务器
+        run: |
+          set -e
+          ssh deploy-target "mkdir -p '$DEPLOY_PATH/releases'"
+          scp release/blog-release.tar.gz "deploy-target:$DEPLOY_PATH/releases/${{ atomgit.sha }}.tar.gz"
+
+      - name: 远程部署（切换版本 + 重启 + 健康检查 + 失败回滚）
+        run: |
+          set -e
+          export \
+            DEPLOY_PATH="$DEPLOY_PATH" \
+            SERVICE_NAME="$DEPLOY_SERVICE_NAME" \
+            RELEASE_SHA="${{ atomgit.sha }}" \
+            KEEP_RELEASES="$KEEP_RELEASES" \
+            HEALTH_CHECK_URL="$HEALTH_CHECK_URL"
+          ssh deploy-target 'bash -s' < scripts/deploy/remote-deploy.sh
+
+      - name: 部署后验证
+        run: |
+          for i in $(seq 1 15); do
+            if curl -fsS -o /dev/null --max-time 5 "${{ vars.PUBLIC_HEALTH_CHECK_URL || vars.HEALTH_CHECK_URL || 'http://127.0.0.1:3000' }}"; then
+              echo "站点健康检查通过"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "站点健康检查失败"
+          exit 1
